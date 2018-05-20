@@ -93,8 +93,14 @@ function processRuns(daysFromToday) {
           is_yoga = true;
         }
         
-        // don't update the run if it's in the past.  do this here so we get start/end for snack/stretch processing
-        if (now.getTime() <= e.getStartTime().getTime()) {
+        // don't update the event if it's in the past.  
+        // NOTE weather forecasts are hourly and do not provide the current hour.
+        //      therfore, if event starts within the current hour, there will be no forecast available.
+        //      this check must exclude minutes and seconds for the target start date
+        var x = e.getStartTime();
+        x.setMinutes(0);
+        x.setSeconds(0);
+        if (now.getTime() <= x.getTime()) {
           // set norms for run and yoga events
           if (is_yoga || is_run) {
             setEventNorms(e);

@@ -173,7 +173,7 @@ function createWeatherDescription(weather_data, run_data) {
 
 function getForecastForHour(date, city, state) {
   // api docs: https://www.wunderground.com/weather/api/d/docs?d=data/hourly10day
-  // example API call: http://api.wunderground.com/api/<KEY>/hourly10day/q/NC/Raleigh.json
+  // example API call: http://api.wunderground.com/api/9d25bfd22c6dc7d5/hourly10day/q/NC/Raleigh.json
   var forecasts = getWeatherUndergroundDataFor("hourly10day", city, state);
   
   // use epoch, but has to be hourly.  clear minutes, seconds
@@ -267,7 +267,7 @@ function getWeatherData(date, length, city, state) {
  * return: night, dawn, day, dusk
  */
 function getTimeOfDay(date, city, state) {
-  // http://api.wunderground.com/api/<KEY>/astronomy/q/NC/Raleigh.json
+  // http://api.wunderground.com/api/9d25bfd22c6dc7d5/astronomy/q/NC/Raleigh.json
 
   var astronomy = getWeatherUndergroundDataFor("astronomy", city, state);
   
