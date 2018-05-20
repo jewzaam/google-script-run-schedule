@@ -157,7 +157,7 @@ function createDescription(weather_data, run_data, clothing_data) {
 }
 
 function createWeatherDescription(weather_data, run_data) {
-  var description = "";
+  var description = '<a href="https://www.wunderground.com/hourly/us/'+weather_data[0].state+'/'+weather_data[0].city+'/date/'+weather_data[0].year+"-"+weather_data[0].month+"-"+weather_data[0].day+'">Hourly Forecast</a><br>';
   
   description += createDescriptionFor(weather_data, "🌡", "temp_f", "F");
   description += createDescriptionFor(weather_data, "💦", "dewpoint_f", "F");
@@ -173,36 +173,34 @@ function createWeatherDescription(weather_data, run_data) {
 
 function getForecastForHour(date, city, state) {
   // api docs: https://www.wunderground.com/weather/api/d/docs?d=data/hourly10day
-  // example API call: http://api.wunderground.com/api/9d25bfd22c6dc7d5/hourly10day/q/NC/Raleigh.json
+  // example API call: http://api.wunderground.com/api/<KEY>/hourly10day/q/NC/Raleigh.json
   var forecasts = getWeatherUndergroundDataFor("hourly10day", city, state);
   
-  // https://www.w3schools.com/jsref/jsref_obj_date.asp
-  var year = date.getYear();
-  var month = date.getMonth() + 1;
-  var day = date.getDate() + 1;
-  var hour = date.getHours();
+  // use epoch, but has to be hourly.  clear minutes, seconds
+  var x = new Date(date);
+  x.setMinutes(0);
+  x.setSeconds(0);
+  var epoch = x.getTime() / 1000;
   
-  debug("searching for forecast on " + year + "-" + month + "-" + day + " at hour=" + hour);
+  debug("forecast search for epoch = " + epoch);
   
   for (var i = 0; i < forecasts.hourly_forecast.length; i++) {
     var forecast = forecasts.hourly_forecast[i];
     
-    if (forecast.FCTTIME.year == year &&
-        forecast.FCTTIME.mon == month &&
-        forecast.FCTTIME.mday == day &&
-        forecast.FCTTIME.hour == hour) {
+    if (forecast.FCTTIME.epoch == epoch) {
+        debug("FORECAST: " + JSON.stringify(forecast));
         return forecast;
     }
   }
   
   // didn't find it.  weird.
-  throw new Error("Could not find forecast in '" + city + ", " + state + "' at " + date + ". Raw WU data: " + forecasts);
+  throw new Error("Could not find forecast in '" + city + ", " + state + "' at " + date + ". Raw WU data: " + JSON.stringify(forecasts));
 }
 
 /**
- * Returns: [{condition_raw, condition_normalized, emoji, temp_f, dewpoint_f, wind_mph, time_of_day}] // each element represents one hour, based on length of the event rounded up
+ * Returns: [{condition_raw, condition_normalized, emoji, temp_f, dewpoint_f, wind_mph, time_of_day, city, state, year, month, day}] // each element represents one hour, based on length of the event rounded up
  */
-function getWeatherData(date, length, city, state, miles) {
+function getWeatherData(date, length, city, state) {
   var weather_data = [];
   
   for (var j = 0; j < length; j++) {
@@ -253,7 +251,12 @@ function getWeatherData(date, length, city, state, miles) {
       dewpoint_f: dewpoint,
       wind_mph: wind_mph,
       time_of_day: time_of_day,
-      chance_of_rain: chance_of_rain
+      chance_of_rain: chance_of_rain,
+      city: city,
+      state: state,
+      year: date.getYear(),
+      month: date.getMonth() + 1,
+      day: date.getDate()
     };
   }
   
@@ -264,7 +267,7 @@ function getWeatherData(date, length, city, state, miles) {
  * return: night, dawn, day, dusk
  */
 function getTimeOfDay(date, city, state) {
-  // http://api.wunderground.com/api/9d25bfd22c6dc7d5/astronomy/q/NC/Raleigh.json
+  // http://api.wunderground.com/api/<KEY>/astronomy/q/NC/Raleigh.json
 
   var astronomy = getWeatherUndergroundDataFor("astronomy", city, state);
   

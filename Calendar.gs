@@ -21,6 +21,11 @@ function Uninstall() {
   }
 }
 
+function processRunsToday() {
+  // useful manual execution, focus on a single day
+  processRuns(0);
+}
+
 function processRunsImmediate() {
   // today and tomorrow
   processRuns(0);
