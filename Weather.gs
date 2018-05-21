@@ -271,14 +271,21 @@ function getTimeOfDay(date, city, state) {
 
   var astronomy = getWeatherUndergroundDataFor("astronomy", city, state);
   
-  var sunrise = new Date();
+  // make sure all dates are on the same day else it's crazy.
+  var sunrise = new Date(date);
   sunrise.setHours(astronomy.sun_phase.sunrise.hour);
   sunrise.setMinutes(astronomy.sun_phase.sunrise.minute);
-  var sunset = new Date();
+  var sunset = new Date(date);
   sunset.setHours(astronomy.sun_phase.sunset.hour);
   sunset.setMinutes(astronomy.sun_phase.sunset.minute);
   var dusk = new Date(sunset.getTime() + 1000 * 60 * SUNSET_LENGTH_MIN); // actually when dusk ends.
   var dawn = new Date(sunrise.getTime() - 1000 * 60 * SUNRISE_LENGTH_MIN);
+  
+  debug("find time of day for: " + date);
+  debug("dawn: " + dawn);
+  debug("sunrise: " + sunrise);
+  debug("sunset: " + sunset);
+  debug("dusk: " + dusk);
   
   dawn = dawn.valueOf();
   sunrise = sunrise.valueOf();
@@ -287,22 +294,17 @@ function getTimeOfDay(date, city, state) {
   date = date.valueOf();
 
   // order of checks matters
-  debug("find time of day for: " + date);
-  debug("dawn: " + dawn);
-  debug("sunrise: " + sunrise);
-  debug("sunset: " + sunset);
-  debug("dusk: " + dusk);
-  
   var time_of_day = "unknown"; // just to have a default
 
-  // is it daytime?
-  if (sunrise <= date <= sunset) {
-    time_of_day = "day";
-  } else if (dawn <= date <= sunrise) {
+  if (date < dawn) {
+    time_of_day = "night";
+  } else if (dawn <= date && date < sunrise) {
     time_of_day = "dawn";
-  } else if (sunset <= date <= dusk) {
+  } else if (sunrise <= date && date < sunset) {
+    time_of_day = "day";
+  } else if (sunset <= date && date < dusk) {
     time_of_day = "dusk";
-  } else if (dusk <= date || date <= dawn) {
+  } else if (dusk < date) {
     time_of_day = "night";
   }
   

@@ -9,9 +9,9 @@ var OUTSIDE_EVENT_COLOR = "7"; // used to trigger things on this script.
 
 function Install() {
   ScriptApp.newTrigger("processRunsImmediate")
-  .timeBased().everyHours(1).create();
+           .timeBased().everyHours(1).create();
   ScriptApp.newTrigger("processRunsFuture")
-  .timeBased().everyDays(1).create();
+           .timeBased().everyDays(1).create();
 }
 
 function Uninstall() {
@@ -42,7 +42,8 @@ function processRunsFuture() {
 function processRuns(daysFromToday) {
   var calendars = CalendarApp.getAllOwnedCalendars();
   var now = new Date();
-  var date = new Date(Date.now() + 1000*60*60*24*daysFromToday); 
+  var date = new Date();
+  date.setDate(date.getDate() + daysFromToday);
   
   var run_cal, run_start, run_end;
   
@@ -55,16 +56,18 @@ function processRuns(daysFromToday) {
     }
   }
   
+  // once is_run is true, it stays true to manage snack and stretch events
+  var is_run = false;
+  
   // find any run events in any calendar
   for (var i = 0; i < calendars.length; i++) {
     var c = calendars[i];
     
     // find a run for target day..
     var events = c.getEventsForDay(date);
-    
+
     for (var j = 0; j < events.length; j++) {
       var e = events[j];
-      var is_run = false;
       var is_yoga = false;
 
       if (e.getColor() == OUTSIDE_EVENT_COLOR) {
@@ -112,6 +115,8 @@ function processRuns(daysFromToday) {
       }
     }
   }
+  
+  debug("is_run: " + is_run);
   
   // have run start & end times (min & max).  process!
   // setup snack & stretch:
@@ -231,7 +236,10 @@ function setEventNorms(event) {
     // ensure event reminder is setup correctly
     // we should see this remind at 7PM the day before.
     // popup is created with minutes before event.  Take hours * 60 + 5 * 60 (to go back from midnight to 7PM) + minutes
-    var expect = (event.getStartTime().getHours() + 5) * 60 + event.getStartTime().getMinutes();
+    var expect = (event.getStartTime().getHours() + 5) * 60 - event.getStartTime().getMinutes();
+    
+    debug("expect: " + new Date(event.getStartTime()));
+    debug("expect: (" + event.getStartTime().getHours() + " +  5) * 60 - " + event.getStartTime().getMinutes() + " = " + expect);
 
     // array of number of minutes before event popup reminder will trigger
     var r = event.getPopupReminders();

@@ -4,7 +4,7 @@ var WTW_FEEL="ib"; // c=cool, ib=in between, w=warm
 function createClothingDescription(weather_data, run_data, clothing_data) {
   if (clothing_data != null && clothing_data.length > 0) {
     
-    var description = "<a href=\"" + clothing_data.wtw_url + "\">What to Wear</a><br>";
+    var description = "<a href=\"" + clothing_data[0].wtw_url + "\">What to Wear</a><br>";
     
     description += createDescriptionFor(clothing_data, "Head", "head");
     description += createDescriptionFor(clothing_data, "Torso", "torso");

@@ -12,7 +12,8 @@ This is a complete hack and I've thought about rewriting it.  But it's working f
 # Using
 
 1. Create a google script project.
-2. Create the scripts and copy them in.
-3. Get a Weather Underground API Key and set in Private.gs.
-4. Run the "Install" function.
-5. For any outdoor activity you want a forecast for, set the color to "Peacock" and location to "<City>, <State>".
+1. Set timezone in script properties.
+1. Create the scripts and copy them in.
+1. Get a Weather Underground API Key and set in Private.gs.
+1. Run the "Install" function.
+1. For any outdoor activity you want a forecast for, set the color to "Peacock" and location to "<City>, <State>".
