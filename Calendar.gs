@@ -56,8 +56,7 @@ function processRuns(daysFromToday) {
     }
   }
   
-  // once is_run is true, it stays true to manage snack and stretch events
-  var is_run = false;
+  var is_snack_stretch = false;
   
   // find any run events in any calendar
   for (var i = 0; i < calendars.length; i++) {
@@ -69,6 +68,7 @@ function processRuns(daysFromToday) {
     for (var j = 0; j < events.length; j++) {
       var e = events[j];
       var is_yoga = false;
+      var is_run = false;
 
       if (e.getColor() == OUTSIDE_EVENT_COLOR) {
         var t = e.getTitle();
@@ -77,6 +77,7 @@ function processRuns(daysFromToday) {
         var tUC = t.toUpperCase();
         if (tUC.indexOf(EVENT_TITLE_RUN_UC) > -1) {
           is_run = true;
+          is_snack_stretch = true;
           
           // can't process a run if we don't have a run calendar
           if (run_cal == null) {
@@ -116,11 +117,11 @@ function processRuns(daysFromToday) {
     }
   }
   
-  debug("is_run: " + is_run);
+  debug("is_snack_stretch: " + is_snack_stretch);
   
   // have run start & end times (min & max).  process!
   // setup snack & stretch:
-  if (is_run && run_start != null && run_end != null) {
+  if (is_snack_stretch && run_start != null && run_end != null) {
     setSnackAndStretchFor(run_cal, run_start, run_end);
   } else {
     deleteSnackFor(run_cal, date);

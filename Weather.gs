@@ -177,12 +177,12 @@ function getForecastForHour(date, city, state) {
   var forecasts = getWeatherUndergroundDataFor("hourly10day", city, state);
   
   // use epoch, but has to be hourly.  clear minutes, seconds
-  var x = new Date(date);
+  var x = new Date(date.getTime());
   x.setMinutes(0);
   x.setSeconds(0);
   var epoch = x.getTime() / 1000;
   
-  debug("forecast search for epoch = " + epoch);
+  debug("forecast search for date = " + date + ", epoch = " + epoch);
   
   for (var i = 0; i < forecasts.hourly_forecast.length; i++) {
     var forecast = forecasts.hourly_forecast[i];
@@ -203,10 +203,11 @@ function getForecastForHour(date, city, state) {
 function getWeatherData(date, length, city, state) {
   var weather_data = [];
   
+  var hour = new Date(date.getTime());
   for (var j = 0; j < length; j++) {
-    var hour = new Date(date.getTime() + j*60*60*1000); // create new date to represent specific hour
+    hour.setHours(hour.getHours() + j);
     // get forecast.  we use caching, so it will only hit WU once.
-    var forecast = getForecastForHour(date, city, state);
+    var forecast = getForecastForHour(hour, city, state);
     
     var temp = forecast.temp.english;
     var dewpoint = forecast.dewpoint.english;
