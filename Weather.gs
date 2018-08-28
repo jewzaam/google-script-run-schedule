@@ -1,11 +1,3 @@
-/*
-NOTE this script works on the assumption that the run is within the next 24 hours.
-
-RFE:  This script doesn't account well for a long run, but I don't do runs more than 2 hours so far.  
-Eventually would be good to figure out the worst weather and make some recommendations based on changing conditions.  
-Or at least create some structure to view it in a table...
-*/
-
 function processWeatherForRunEvent(event, is_run) {
   var location = event.getLocation();
   var title = event.getTitle();
@@ -35,8 +27,8 @@ function processWeatherForRunEvent(event, is_run) {
     var s = location.split(",");
     
     if (s.length == 2) {
-      city = s[0].replace(/\s/g, "");
-      state = s[1].replace(/\s/g, "");
+      city = s[0];
+      state = s[1];
     } else {
       // shrug, force defaults
       city = "";
@@ -72,7 +64,7 @@ function processWeatherForRunEvent(event, is_run) {
     }
   }
 
-  if (is_run) {
+  if (is_run && false) { // WTW changed. damnit.
     // get clothing info: [{emoji, description}]
     var clothing_data = getClothingData(weather_data, miles);
 
@@ -83,9 +75,13 @@ function processWeatherForRunEvent(event, is_run) {
         emoji += ("➡" + clothing_data[i].emoji);
       }
     }
-  }  
+  }
   
-  var desc = createDescription(weather_data, run_data, clothing_data);
+  // split out the preserved description
+  var desc = event.getDescription().split(EVENT_DESCRIPTION_DELIMITER)[0].trim();
+  
+  desc += ("\n" + EVENT_DESCRIPTION_DELIMITER + "\n");
+  desc += createDescription(weather_data, run_data, clothing_data);
   
   title = title + DELIMITER_EMOJI + emoji;
   debug("new title = " + title);
@@ -131,7 +127,6 @@ function getRunData(weather_data, event_data) {
     Logger.log("couldn't get miles");
   }
   
-  // add miles to data
   // get clothing info: {emoji, head, torso, hands, legs}
   var clothing_data = getClothingData(weather_data, miles);
  
@@ -147,8 +142,10 @@ function getRunData(weather_data, event_data) {
 function createDescription(weather_data, run_data, clothing_data) {
   var description = "";
   description += createWeatherDescription(weather_data, run_data, clothing_data);
+  /*
   description += "<br><br>";
   description += createClothingDescription(weather_data, run_data, clothing_data);
+  */
   description += "<br><br>Last Updated: " + Utilities.formatDate(new Date(), "EST", "yyyy-MM-dd HH:mm:ss 'EST'");
   
   debug("description = " + description);
@@ -379,4 +376,3 @@ function conditionToEmoji(condition) {
   
   return {raw: condition, normalized: cond, emoji: emoji};
 }
-
