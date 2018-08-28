@@ -21,35 +21,63 @@ function processWeatherForRunEvent(event, is_run) {
     Logger.log("couldn't get miles");
   }
   
-  var city, state;
+  // returns object: [{temp_f, condition_raw, condition_normalized, wind_mph, time_of_day, emoji, dewpoint_f]]
+  var hours = event.getEndTime().getHours() - event.getStartTime().getHours() + Math.ceil((event.getEndTime().getMinutes() - event.getStartTime().getMinutes())/60);
+  debug("hours: " + hours);
+  
+  // location might be more than just city and state.  try tuples until something works.
+  var city = "";
+  var state = "";
+  var weather_data;
   
   try {
     var s = location.split(",");
     
-    if (s.length == 2) {
-      city = s[0];
-      state = s[1];
-    } else {
-      // shrug, force defaults
-      city = "";
-      state = "";
+    if (s.length >= 2) {
+      for (var x = 0; x < s.length-1; x++) {
+        city = s[x].trim();
+        state = s[x+1].trim();
+        
+        if (state.indexOf(" ") > 0) {
+          // could be "State Zip"
+          state = state.split(" ")[0];
+        }
+        
+        try {
+          debug("TRYING: city / state: " + city + " / " + state);
+          weather_data = getWeatherData(event.getStartTime(), hours, city, state);
+        } catch (Error) {
+          if (city.indexOf(" ") > 0) {
+            // city could need space changed to dash
+            city.replace(" ", "-");
+            try {
+              weather_data = getWeatherData(event.getStartTime(), hours, city, state);
+            } catch (Error) {
+              city = "";
+              state = "";
+            }
+          } else {
+            city = "";
+            state = "";
+          }
+        }
+      }
     }
     
     // and just in case
     if (city == "" || state == "") {
       city = DEFAULT_CITY;
       state = DEFAULT_STATE;
-      event.setLocation(city + ", " + state);
+      if (location.length == 0) {
+        event.setLocation(city + ", " + state);
+      }
     }
   } catch (Error) {}
-  
+
   debug("city = " + city);
   debug("state = " + state);
   debug("miles = " + miles);
-  
-  // returns object: [{temp_f, condition_raw, condition_normalized, wind_mph, time_of_day, emoji, dewpoint_f]]
-  var hours = event.getEndTime().getHours() - event.getStartTime().getHours() + Math.ceil((event.getEndTime().getMinutes() - event.getStartTime().getMinutes())/60);
-  debug("hours: " + hours);
+
   var weather_data = getWeatherData(event.getStartTime(), hours, city, state);
 
   // create title: weather then clothing emoji for title
