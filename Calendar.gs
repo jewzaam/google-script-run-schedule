@@ -5,6 +5,8 @@ var CALENDAR_NAME_RUN_UC = CALENDAR_NAME_RUN.toUpperCase();
 var EVENT_TITLE_RUN_UC = "RUN"; // used for simle search of event titles
 var EVENT_TITLE_YOGA_UC = "YOGA";
 
+var EVENT_DESCRIPTION_DELIMITER = "---"; // anything above this is preserved
+
 var OUTSIDE_EVENT_COLOR = "7"; // used to trigger things on this script.
 
 function Install() {
@@ -223,7 +225,7 @@ function setSnackAndStretchFor(run_cal, run_start, run_end) {
   
   // create stretch if it doesn't exist now (might have been deleted)
   if (stretch == null) {
-    stretch = run_cal.createEvent(EVENT_TITLE_STRETCH, stretch_start_date, new Date(stretch_start_date.getTime() + 2*60*60*1000));
+    stretch = run_cal.createEvent(EVENT_TITLE_STRETCH, stretch_start_date, new Date(stretch_start_date.getTime() + 3*60*60*1000));
     Logger.log("Created Stretch event");
   }
 }
@@ -252,4 +254,3 @@ function setEventNorms(event) {
     }
   }
 }
-
