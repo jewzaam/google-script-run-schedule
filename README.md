@@ -17,3 +17,4 @@ This is a complete hack and I've thought about rewriting it.  But it's working f
 1. Get a Weather Underground API Key and set in Private.gs.
 1. Run the "Install" function.
 1. For any outdoor activity you want a forecast for, set the color to "Peacock" and location to "<City>, <State>".
+1. Customize location of legend if you change something.

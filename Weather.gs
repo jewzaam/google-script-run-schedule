@@ -191,6 +191,8 @@ function createWeatherDescription(weather_data, run_data) {
   description += createDescriptionFor(weather_data, "🌬", "wind_mph", "mph");
   description += createDescriptionFor(weather_data, "🌞", "time_of_day");
   
+  description += '<br><a href="http://files.jewzaam.org/legend.html">Legend</a>'
+  
   debug("description = " + description);
   
   return description;
@@ -404,3 +406,4 @@ function conditionToEmoji(condition) {
   
   return {raw: condition, normalized: cond, emoji: emoji};
 }
+
