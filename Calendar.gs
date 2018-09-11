@@ -2,7 +2,7 @@ var EVENT_TITLE_STRETCH = "Stretch";
 var EVENT_TITLE_SNACK = "Snack";
 var CALENDAR_NAME_RUN = "Run";
 var CALENDAR_NAME_RUN_UC = CALENDAR_NAME_RUN.toUpperCase();
-var EVENT_TITLE_RUN_UC = "RUN"; // used for simle search of event titles
+var EVENT_TITLE_RUN_UC = "RUN"; // used for simple search of event titles
 var EVENT_TITLE_YOGA_UC = "YOGA";
 
 var EVENT_DESCRIPTION_DELIMITER = "---"; // anything above this is preserved
@@ -254,3 +254,4 @@ function setEventNorms(event) {
     }
   }
 }
+

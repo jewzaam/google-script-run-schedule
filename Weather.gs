@@ -189,9 +189,11 @@ function createWeatherDescription(weather_data, run_data) {
   description += createDescriptionFor(weather_data, "🌈", "condition_raw"); // this may not work
   description += createDescriptionFor(weather_data, "🌧", "chance_of_rain", "%");
   description += createDescriptionFor(weather_data, "🌬", "wind_mph", "mph");
-  description += createDescriptionFor(weather_data, "🌞", "time_of_day");
-  
-  description += '<br><a href="http://files.jewzaam.org/legend.html">Legend</a>'
+  description += createDescriptionFor(weather_data, "🌞", "time_of_day_string");
+  description += createDescriptionFor(weather_data, "🌄", "time_of_day_sunrise", "AM");
+  description += createDescriptionFor(weather_data, "🌛", "time_of_day_sunset", "PM");
+
+description += '<br><a href="http://files.jewzaam.org/legend.html">Legend</a>'
   
   debug("description = " + description);
   
@@ -248,7 +250,7 @@ function getWeatherData(date, length, city, state) {
     // if night, dawn, or dusk, set emoji first
     var emoji = "";
     
-    switch (time_of_day) {
+    switch (time_of_day.string) {
       case "night":
         emoji += "🌛";
         break;
@@ -278,7 +280,9 @@ function getWeatherData(date, length, city, state) {
       temp_f: temp,
       dewpoint_f: dewpoint,
       wind_mph: wind_mph,
-      time_of_day: time_of_day,
+      time_of_day_string: time_of_day.string,
+      time_of_day_sunrise: time_of_day.sunrise.hour + ":" + time_of_day.sunrise.minute,
+      time_of_day_sunset: time_of_day.sunset.hour-12 + ":" + time_of_day.sunset.minute,
       chance_of_rain: chance_of_rain,
       city: city,
       state: state,
@@ -292,10 +296,10 @@ function getWeatherData(date, length, city, state) {
 }
 
 /**
- * return: night, dawn, day, dusk
+ * return: {string: (one of night, dawn, day, dusk), sunrise: {hour: int, minute: int}, sunset: {hour: int, minute: int}}
  */
 function getTimeOfDay(date, city, state) {
-  // http://api.wunderground.com/api/9d25bfd22c6dc7d5/astronomy/q/NC/Raleigh.json
+  // http://api.wunderground.com/api/<API KEY>/astronomy/q/NC/Raleigh.json
 
   var astronomy = getWeatherUndergroundDataFor("astronomy", city, state);
   
@@ -338,7 +342,11 @@ function getTimeOfDay(date, city, state) {
   
   debug("calculated time of day: " + time_of_day);
   
-  return time_of_day;
+  return {
+    "string": time_of_day,
+    "sunrise": astronomy.sun_phase.sunrise,
+    "sunset": astronomy.sun_phase.sunset,
+  }
 }
 
 /**
