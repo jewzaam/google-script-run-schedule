@@ -184,14 +184,14 @@ function createDescription(weather_data, run_data, clothing_data) {
 function createWeatherDescription(weather_data, run_data) {
   var description = '<a href="https://www.wunderground.com/hourly/us/'+weather_data[0].state+'/'+weather_data[0].city+'/date/'+weather_data[0].year+"-"+weather_data[0].month+"-"+weather_data[0].day+'">Hourly Forecast</a><br>';
   
-  description += createDescriptionFor(weather_data, "🌡", "temp_f", "F");
-  description += createDescriptionFor(weather_data, "💦", "dewpoint_f", "F");
-  description += createDescriptionFor(weather_data, "🌈", "condition_raw"); // this may not work
-  description += createDescriptionFor(weather_data, "🌧", "chance_of_rain", "%");
-  description += createDescriptionFor(weather_data, "🌬", "wind_mph", "mph");
-  description += createDescriptionFor(weather_data, "🌞", "time_of_day_string");
-  description += createDescriptionFor(weather_data, "🌄", "time_of_day_sunrise", "AM");
-  description += createDescriptionFor(weather_data, "🌛", "time_of_day_sunset", "PM");
+  description += createDescriptionFor(weather_data, "🌡", "temp_f", "F", true);
+  description += createDescriptionFor(weather_data, "💦", "dewpoint_f", "F", true);
+  description += createDescriptionFor(weather_data, "🌈", "condition_raw", null, true); // this may not work
+  description += createDescriptionFor(weather_data, "🌧", "chance_of_rain", "%", true);
+  description += createDescriptionFor(weather_data, "🌬", "wind_mph", "mph", true);
+  description += createDescriptionFor(weather_data, "🌞", "time_of_day_string", null, false);
+  description += createDescriptionFor(weather_data, "🌄", "time_of_day_sunrise", "AM", false);
+  description += createDescriptionFor(weather_data, "🌛", "time_of_day_sunset", "PM", false);
 
 description += '<br><a href="http://files.jewzaam.org/legend.html">Legend</a>'
   

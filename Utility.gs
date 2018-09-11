@@ -31,17 +31,32 @@ function getUrl(url) {
   return response;
 }
 
-function createDescriptionFor(data, label, key, uom) {
+function createDescriptionFor(data, label, key, uom, show_transitions) {
+  debug("show_transitions: " + show_transitions);
   var output = "<strong>" + label + "</strong>: ";
+  var next = "";
+  var last = "";
   
   for (var i = 0; i < data.length; i++) {
-    output += data[i][key];
+    next = data[i][key];
+    
     if (uom != null) {
-      output += (" " + uom);
+      next += (" " + uom);
     }
-    if (i+1 < data.length) {
-      output += " ➡ "
+    if (last == "") {
+      // only add the first iteration, when last is not set
+      output += next;
+      if (!show_transitions) {
+        last = next;
+        // bail early
+        break;
+      }
+    } else if (show_transitions) {
+      output += (" ➡ " + next);
     }
+    
+    last = next;
+    next = "";
   }
   
   output += "<br>";
