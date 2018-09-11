@@ -18,3 +18,11 @@ This is a complete hack and I've thought about rewriting it.  But it's working f
 1. Run the "Install" function.
 1. For any outdoor activity you want a forecast for, set the color to "Peacock" and location to "<City>, <State>".
 1. Customize location of legend if you change something.
+
+# Uploading Legend to S3
+
+Start file upload and..
+
+1. select legend.html file
+2. set permission to allow public read
+3. define header `Content-Type` with value `text/html; charset=utf-8`
