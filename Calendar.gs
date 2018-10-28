@@ -76,8 +76,9 @@ function processRuns(daysFromToday) {
         var t = e.getTitle();
         Logger.log("Event: " + date.getDay() + " " + t);
         
+        // for any event with at least one guest check if I accepted too
         var tUC = t.toUpperCase();
-        if (tUC.indexOf(EVENT_TITLE_RUN_UC) > -1) {
+        if (tUC.indexOf(EVENT_TITLE_RUN_UC) > -1 && (e.getGuestList().length == 0 || e.getGuestByEmail(Session.getActiveUser().getEmail()).getGuestStatus() != e.getMyStatus().NO)) {
           is_run = true;
           is_snack_stretch = true;
           
@@ -248,10 +249,10 @@ function setEventNorms(event) {
     var r = event.getPopupReminders();
     if (r.length != 2 || (r[0] != expect && r[1] != expect)) {
       event.removeAllReminders();
-      event.addPopupReminder(60); // also 60 min before..
+      event.addPopupReminder(5);
+      event.addPopupReminder(60);
       event.addPopupReminder(expect);
       Logger.log("reminders have been reset");
     }
   }
 }
-
