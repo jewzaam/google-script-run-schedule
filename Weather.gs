@@ -37,8 +37,6 @@ function processWeatherForRunEvent(event, is_run) {
       for (var x = s.length - 2; x >= 0; x--) {
         city = s[x].trim();
         state = s[x+1].trim();
-        debug("city ?= " + city);
-        debug("state ?= " + state);
         
         if (state.indexOf(" ") > 0) {
           // could be "State Zip"
