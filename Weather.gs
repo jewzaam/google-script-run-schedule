@@ -34,9 +34,11 @@ function processWeatherForRunEvent(event, is_run) {
     var s = location.split(",");
     
     if (s.length >= 2) {
-      for (var x = 0; x < s.length-1; x++) {
+      for (var x = s.length - 2; x >= 0; x--) {
         city = s[x].trim();
         state = s[x+1].trim();
+        debug("city ?= " + city);
+        debug("state ?= " + state);
         
         if (state.indexOf(" ") > 0) {
           // could be "State Zip"
@@ -46,6 +48,8 @@ function processWeatherForRunEvent(event, is_run) {
         try {
           debug("TRYING: city / state: " + city + " / " + state);
           weather_data = getWeatherData(event.getStartTime(), hours, city, state);
+          // well, it didn't fail
+          break;
         } catch (Error) {
           if (city.indexOf(" ") > 0) {
             // city could need space changed to dash
@@ -414,4 +418,3 @@ function conditionToEmoji(condition) {
   
   return {raw: condition, normalized: cond, emoji: emoji};
 }
-
