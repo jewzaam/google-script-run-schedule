@@ -1,5 +1,10 @@
-function test() {
-  process_events(3);
+function trigger_calendar_updated(cal_data) {
+  log_start("process_calendar_event");
+  
+  // we don't get any event ID for what was updated, so just process "today" as that's likely what we care about
+  process_today();
+  
+  log_stop("process_calendar_event");
 }
 
 function process_today() {
@@ -11,10 +16,14 @@ function process_tomorrow() {
 }
 
 function process_future() {
-  // day after tomorrow, up to 10 days
-  for (var i = 1; i < 10; i++) {
+  // day after tomorrow, up to 6 days out
+  for (var i = 1; i < 6; i++) {
     process_events(i);
   }
+}
+
+function process_TEST() {
+  process_events(3);
 }
 
 function was_accepted(event) {
@@ -43,97 +52,77 @@ function process_events(days_from_today) {
   debug("target = " + target);
   debug("timezone = " + Session.getScriptTimeZone());
   
-  var min_run_start, max_run_end;
+  var main_cals = [CalendarApp.getCalendarsByName(CALENDAR_NAME_MAIN_1)[0], CalendarApp.getCalendarsByName(CALENDAR_NAME_MAIN_2)[0]];
   
-  var main_cal = CalendarApp.getCalendarsByName(CALENDAR_NAME_MAIN)[0];
-  var run_cal = CalendarApp.getCalendarsByName(CALENDAR_NAME_RUN)[0];
-  
-  var found_run = false;
-  
-  // find any outdoor events in calendar
-  var events = find_event_for(main_cal, target);
-  
-  for (var j = 0; j < events.length; j++) {
-    var e = events[j];
-    var is_run = false;
+  for (var a = 0; a < main_cals.length; a++) {
+    // find any outdoor events in calendar
+    var events = find_event_for(main_cals[a], target);
     
-    debug("event.getId() = " + e.getId());
-    
-    if (e.getColor() == OUTSIDE_EVENT_COLOR) {
-      var t = e.getTitle();
-      Logger.log("Event: " + target.getDay() + " " + t);
-      
-      // for any event with at least one guest check if I accepted too
-      var tUC = t.toUpperCase();
-      if (tUC.indexOf(EVENT_TITLE_RUN_UC) > -1 && was_accepted(e)) {
-        found_run = true;
-        
-        if (run_cal == null) {
-          // can't process a run if we don't have a run calendar
-          // NOTE do not fail before this in case there are no runs to process
-          throw new Error("No calendar named '" + CALENDAR_NAME_RUN + "' found. Set with config option 'CALENDAR_NAME_RUN'.");
-        }
-        
-        Logger.log("Found a '" + EVENT_TITLE_RUN + "': " + t);
-      }
-      
-      // skip this event if we can't process it
-      if (!can_process(e)) {
-        continue;
-      }
-      
-      // it's an outdoor event! update weather on the event and get the weather data
-      var weather = get_weather_forecast(e);
-      debug("TEMP DEBUG: " + JSON.stringify(weather));
-      var w_title = get_weather_title(weather);
-      var w_description = get_weather_description(weather);
-      
-      update_event(e, w_title, w_description);
-      
-      if (found_run && was_accepted(e)) {
-        // it's also a run!
-        
-        // clear reminders for myself on the main event (they'll be set on clothing event)
-        e.removeAllReminders();
-        
-        var clothing = get_clothing_for(weather);
-        // note we don't save clothing on the run event because clothing is personal
-        // and outdoor events (a superset of run events) can have others invited
-        var c_title = get_clothing_title(clothing);
-        var c_desc = get_clothing_description(clothing);
-        
-        var ec = find_related_event_for_on(e, run_cal);
-        
-        // delete extras
-        for (var r = 1; r < ec.length; r++) {
-          ec[r].deleteEvent();
-        }
-        
-        var clothing_event;
-        
-        if (ec.length > 0) {
-          clothing_event = ec[0];
-        } else {
-          clothing_event = run_cal.createEvent(e.getTitle(), e.getStartTime(), e.getEndTime());
-        }
-        
-        // update event title, start, end, desc, and location
-        clothing_event.setTitle(e.getTitle());
-        c_desc = e.getDescription() + "\n" + DELIMITER_EVENT_DESCRIPTION + "\n" + c_desc + 
-          "\n" + DELIMITER_EVENT_DESCRIPTION + "\n" + "ref_id=" + e.getId();
-        clothing_event.setDescription(c_desc);
-        clothing_event.setLocation(e.getLocation());
-        clothing_event.setTime(e.getStartTime(), e.getEndTime());
-        
-        save_run_reminders_for(clothing_event);
-      }
+    for (var j = 0; j < events.length; j++) {
+      process_event(events[j]);
     }
   }
   
-  // cleanup any clothing events that have no reference anymore.
-  delete_unrelated_events_on(main_cal, run_cal, target);
-  
   log_stop("process_events("+days_from_today+")");
+}
+
+function process_event(e) {
+  var found_run = false;
+  var is_run = false;
+  var run_cal = CalendarApp.getCalendarsByName(CALENDAR_NAME_RUN)[0];
+  
+  debug("event.getId() = " + e.getId());
+  
+  if (e.getColor() == OUTSIDE_EVENT_COLOR) {
+    var t = e.getTitle();
+    
+    if (e.getLocation() == null || e.getLocation() == "") {
+      e.setLocation(DEFAULT_CITY + ", " + DEFAULT_STATE);
+    }
+    
+    // for any event with at least one guest check if I accepted too
+    var tUC = t.toUpperCase();
+    if (tUC.indexOf(EVENT_TITLE_RUN_UC) > -1 && was_accepted(e)) {
+      found_run = true;
+      
+      if (run_cal == null) {
+        // can't process a run if we don't have a run calendar
+        // NOTE do not fail before this in case there are no runs to process
+        throw new Error("No calendar named '" + CALENDAR_NAME_RUN + "' found. Set with config option 'CALENDAR_NAME_RUN'.");
+      }
+      
+      Logger.log("Found a '" + EVENT_TITLE_RUN + "': " + t);
+    }
+    
+    // skip this event if we can't process it
+    if (!can_process(e)) {
+      return;
+    }
+    
+    // it's an outdoor event! update weather on the event and get the weather data
+    //var weather = get_weather_forecast(e);
+    var weather = weather_api_get_forecast(e);
+    
+    debug("TEMP DEBUG: " + JSON.stringify(weather));
+    var w_title = get_weather_title(weather);
+    var w_desc = get_weather_description(weather);
+    
+    if (found_run && was_accepted(e)) {
+      // it's also a run!
+      
+      save_run_reminders_for(e);
+      
+      var clothing = get_clothing_for(weather);
+      var c_desc = get_clothing_description(clothing);
+      
+      w_desc = w_desc + "\n" + DELIMITER_EVENT_DESCRIPTION + "\n" + c_desc;
+    }
+    
+    // also add when this event was updated (gauge of age)
+    w_desc = w_desc + "\n" + DELIMITER_EVENT_DESCRIPTION + "\n" + "Updated: " + new Date();
+    
+    update_event(e, w_title, w_desc);
+  }
 }
 
 
@@ -192,11 +181,10 @@ function save_run_reminders_for(event) {
     // ensure event reminder is setup correctly
     // we should see this remind at 7PM the day before.
     // popup is created with minutes before event.  Take hours * 60 + 5 * 60 (to go back from midnight to 7PM) + minutes
-    var expect = (event.getStartTime().getHours()) * 60 - event.getStartTime().getMinutes();
+    var expect = (event.getStartTime().getHours()) * 60 + 5 * 60 + event.getStartTime().getMinutes();
     
-    debug("expect: " + new Date(event.getStartTime()));
-    debug("expect: (" + event.getStartTime().getHours() + " +  5) * 60 - " + event.getStartTime().getMinutes() + " = " + expect);
-
+    debug("expect: " + expect);
+    
     // array of number of minutes before event popup reminder will trigger
     var r = event.getPopupReminders();
     if (r.length != 2 || (r[0] != expect && r[1] != expect)) {
