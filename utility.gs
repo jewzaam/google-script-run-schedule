@@ -26,7 +26,8 @@ var DELIMITER_EMOJI = get_config("DELIMITER_EMOJI");
 
 var CALENDAR_NAME_RUN = get_config("CALENDAR_NAME_RUN");
 var CALENDAR_NAME_RUN_UC = CALENDAR_NAME_RUN.toUpperCase();
-var CALENDAR_NAME_MAIN = get_config("CALENDAR_NAME_MAIN");
+var CALENDAR_NAME_MAIN_1 = get_config("CALENDAR_NAME_MAIN_1");
+var CALENDAR_NAME_MAIN_2 = get_config("CALENDAR_NAME_MAIN_2");
 var EVENT_TITLE_RUN_UC = get_config("EVENT_TITLE_RUN");
 
 var DELIMITER_EVENT_DESCRIPTION = get_config("DELIMITER_EVENT_DESCRIPTION");
@@ -43,7 +44,15 @@ function install() {
   ScriptApp.newTrigger("create_menu")
            .forSpreadsheet(SpreadsheetApp.getActiveSpreadsheet()).onOpen().create();
 
-  // weather
+  // calendar
+  ScriptApp.newTrigger("trigger_calendar_updated")
+           .forUserCalendar("nzmalik@gmail.com")
+           .onEventUpdated().create();
+  ScriptApp.newTrigger("trigger_calendar_updated")
+           .forUserCalendar("s0i83cv2ujpu00r2fuam9atlcs@group.calendar.google.com")
+           .onEventUpdated().create();
+
+  // periodic
   ScriptApp.newTrigger("process_today")
            .timeBased().everyHours(1).create();
   ScriptApp.newTrigger("process_future")
@@ -69,12 +78,14 @@ function uninstall() {
 
 function create_menu() 
 {
+  log_start("create_menu");
   var menuEntries = [ 
     {name: "1. Weather: Today", functionName: "process_today"},
     {name: "2. Weather: Tomorrow", functionName: "process_tomorrow"},
     {name: "3. Weather: Future", functionName: "process_future"},
   ];
   SpreadsheetApp.getActiveSpreadsheet().addMenu("➤ Run", menuEntries);
+  log_stop("create_menu");
 }
 
 function get_config(key) {
@@ -159,4 +170,20 @@ function ISODateString(d){
   + pad(d.getUTCHours())+':'
   + pad(d.getUTCMinutes())+':'
   + pad(d.getUTCSeconds())+'Z'
+}
+
+function get_city_for(event) {
+  return CACHE_CITY[event.getId()];
+}
+
+function set_city_for(event, city) {
+  CACHE_CITY[event.getId()] = city;
+}
+
+function get_state_for(event) {
+  return CACHE_STATE[event.getId()];
+}
+
+function set_state_for(event, state) {
+  CACHE_STATE[event.getId()] = state;
 }
